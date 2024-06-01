@@ -50,6 +50,9 @@ const client = new MongoClient(uri, {
 
 async function run() {
   try {
+
+    const usersCollection = client.db('LovingPets').collection('users')
+
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
     // auth related api
@@ -66,7 +69,7 @@ async function run() {
           })
           .send({ success: true })
       })
-      
+
        // Logout
     app.get('/logout', async (req, res) => {
         try {
@@ -82,6 +85,30 @@ async function run() {
           res.status(500).send(err)
         }
       })
+
+      // save a user data in db
+    app.put('/user', async (req, res) => {
+        const user = req.body
+        const query = { email: user?.email }
+        // check if user already exists in db
+        const isExist = await usersCollection.findOne(query)
+        if (isExist) {
+            return res.send(isExist)
+        }
+  
+        // save user for the first time
+        const options = { upsert: true }
+        const updateDoc = {
+          $set: {
+            ...user,
+            timestamp: Date.now(),
+          },
+        }
+        const result = await usersCollection.updateOne(query, updateDoc, options)
+        res.send(result)
+      })
+  
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
