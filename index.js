@@ -52,6 +52,8 @@ async function run() {
   try {
 
     const usersCollection = client.db('LovingPets').collection('users')
+    const categoryCollection = client.db('LovingPets').collection('PetCategory')
+    const petCollection = client.db('LovingPets').collection('Pets')
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
@@ -85,6 +87,20 @@ async function run() {
           res.status(500).send(err)
         }
       })
+
+    //   category get
+
+    app.get('/petCategory', async (req, res) => {
+        const result = await categoryCollection.find().toArray()
+        res.send(result)
+      })
+
+    //   petListing
+    app.get('/pets', async (req, res) => {
+        const result = await petCollection.find().toArray()
+        res.send(result)
+      })
+
 
       // save a user data in db
     app.put('/user', async (req, res) => {
