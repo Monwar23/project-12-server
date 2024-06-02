@@ -35,6 +35,8 @@ const verifyToken = async (req, res, next) => {
       next()
     })
   }
+
+ 
   
 
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.as3doaz.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -54,6 +56,19 @@ async function run() {
     const usersCollection = client.db('LovingPets').collection('users')
     const categoryCollection = client.db('LovingPets').collection('PetCategory')
     const petCollection = client.db('LovingPets').collection('Pets')
+
+    // verify admin middleware
+    const verifyAdmin = async (req, res, next) => {
+      console.log('hello')
+      const user = req.user
+      const query = { email: user?.email }
+      const result = await usersCollection.findOne(query)
+      console.log(result?.role)
+      if (!result || result?.role !== 'admin')
+        return res.status(401).send({ message: 'unauthorized access!!' })
+
+      next()
+    }
 
     // Connect the client to the server	(optional starting in v4.7)
     // await client.connect();
@@ -118,9 +133,17 @@ async function run() {
         res.send(result);
       })
 
+      // user
+      // get a user info by email from db
+    app.get('/user/:email', async (req, res) => {
+      const email = req.params.email
+      const result = await usersCollection.findOne({ email })
+      res.send(result)
+    })
 
-      // save a user data in db
-    app.put('/user', async (req, res) => {
+  
+  
+      app.put('/user', async (req, res) => {
         const user = req.body
         const query = { email: user?.email }
         // check if user already exists in db
