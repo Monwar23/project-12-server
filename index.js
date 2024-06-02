@@ -114,8 +114,8 @@ async function run() {
 
   
     app.get('/pets', async (req, res) => {
-      const { name, category } = req.query;
-      const query = {};
+      const { name, category,status } = req.query;
+      const query = {pet_status: status || 'not adopted'};
       if (name) {
         query.pet_name = { $regex: name, $options: 'i' };
       }
@@ -131,6 +131,13 @@ async function run() {
         const query = { _id: new ObjectId(id) }
         const result = await petCollection.findOne(query);
         res.send(result);
+      })
+
+      // all pets
+
+      app.get('/allPets', async (req, res) => {
+        const result = await petCollection.find().toArray()
+        res.send(result)
       })
 
       // user
