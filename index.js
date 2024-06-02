@@ -158,6 +158,8 @@ async function run() {
       const result = await usersCollection.updateOne(filter, updatedDoc);
       res.send(result);
   })
+
+
   
       app.put('/user', async (req, res) => {
         const user = req.body
@@ -179,6 +181,13 @@ async function run() {
         const result = await usersCollection.updateOne(query, updateDoc, options)
         res.send(result)
       })
+
+      app.delete('/users/:id',verifyToken,verifyAdmin, async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await usersCollection.deleteOne(query);
+        res.send(result);
+    })
   
 
     // Send a ping to confirm a successful connection
