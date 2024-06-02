@@ -134,14 +134,20 @@ async function run() {
       })
 
       // user
-      // get a user info by email from db
+    
     app.get('/user/:email', async (req, res) => {
       const email = req.params.email
       const result = await usersCollection.findOne({ email })
       res.send(result)
     })
 
-  
+    
+    app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+      const result = await usersCollection.find().toArray()
+      res.send(result)
+    })
+
+
   
       app.put('/user', async (req, res) => {
         const user = req.body
