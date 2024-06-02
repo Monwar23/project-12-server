@@ -147,6 +147,18 @@ async function run() {
         res.send(result);
       })
 
+      app.get("/allPets/email/:email", verifyToken, async (req, res) => {
+        const tokenEmail = req.user.email
+        const email = req.params.email;
+        if (tokenEmail !== email) {
+          return res.status(403).send({ message: 'forbidden access' })
+        }
+        const query = { email: email };
+        const result = await petCollection.find(query).toArray();
+        res.send(result);
+      });
+
+
       app.post('/allPets', verifyToken, verifyAdmin, async (req, res) => {
         const item = req.body;
         const result = await petCollection.insertOne(item);
