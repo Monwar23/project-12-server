@@ -147,6 +147,12 @@ async function run() {
         res.send(result);
       })
 
+      app.post('/allPets', verifyToken, verifyAdmin, async (req, res) => {
+        const item = req.body;
+        const result = await petCollection.insertOne(item);
+        res.send(result);
+      });
+
       // user
     
     app.get('/user/:email', async (req, res) => {
