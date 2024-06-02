@@ -97,10 +97,19 @@ async function run() {
 
     //  petListing
 
+  
     app.get('/pets', async (req, res) => {
-        const result = await petCollection.find().toArray()
-        res.send(result)
-      })
+      const { name, category } = req.query;
+      const query = {};
+      if (name) {
+        query.pet_name = { $regex: name, $options: 'i' };
+      }
+      if (category) {
+        query.pet_category = category;
+      }
+      const result = await petCollection.find(query).sort({ timestamp: -1 }).toArray();
+      res.send(result);
+    });
 
       app.get('/pets/:id', async (req, res) => {
         const id = req.params.id;
