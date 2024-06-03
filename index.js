@@ -165,6 +165,31 @@ async function run() {
         res.send(result);
       });
 
+      app.put('/allPets/:id', async (req, res) => {
+        const id = req.params.id;
+        const filter = { _id: new ObjectId(id) };
+        const options = { upsert: true };
+        const updatePets = req.body;
+        const pets = {
+            $set: {
+                pet_name: updatePets.pet_name,
+                pet_age: updatePets.pet_age,
+                pet_location: updatePets.pet_location,
+                pet_category: {
+                    value: updatePets.pet_category.value,
+                    label: updatePets.pet_category.label
+                },
+                pet_short_description: updatePets.pet_short_description,
+                pet_long_description: updatePets.pet_long_description,
+                pet_status: updatePets.pet_status,
+                email: updatePets.email,
+                pet_image_url: updatePets.pet_image_url,
+            },
+        };
+        const result = await petCollection.updateOne(filter, pets, options);
+        res.send(result);
+    });
+
       app.delete('/allPets/:id',verifyToken,verifyAdmin, async (req, res) => {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) }
