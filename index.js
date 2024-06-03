@@ -165,6 +165,13 @@ async function run() {
         res.send(result);
       });
 
+      app.delete('/allPets/:id',verifyToken,verifyAdmin, async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await petCollection.deleteOne(query);
+        res.send(result);
+    })
+
       // user
     
     app.get('/user/:email', async (req, res) => {
