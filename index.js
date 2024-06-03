@@ -159,7 +159,7 @@ async function run() {
       });
 
 
-      app.post('/allPets', verifyToken, verifyAdmin, async (req, res) => {
+      app.post('/allPets', verifyToken,  async (req, res) => {
         const item = req.body;
         const result = await petCollection.insertOne(item);
         res.send(result);
@@ -190,19 +190,22 @@ async function run() {
         res.send(result);
     });
 
-    app.patch('/allPets/:id',verifyToken,verifyAdmin, async (req, res) => {
+    app.patch('/allPets/:id',verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
+      const pet = await petCollection.findOne(filter);
+      const newStatus = pet.pet_status === 'adopted' ? 'not adopted' : 'adopted';
+
       const updatedDoc = {
           $set: {
-              pet_status: 'adopted'
+              pet_status: newStatus
           }
       }
       const result = await petCollection.updateOne(filter, updatedDoc);
       res.send(result);
   })
 
-      app.delete('/allPets/:id',verifyToken,verifyAdmin, async (req, res) => {
+      app.delete('/allPets/:id',verifyToken, async (req, res) => {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) }
         const result = await petCollection.deleteOne(query);
