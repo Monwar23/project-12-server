@@ -56,6 +56,7 @@ async function run() {
     const usersCollection = client.db('LovingPets').collection('users')
     const categoryCollection = client.db('LovingPets').collection('PetCategory')
     const petCollection = client.db('LovingPets').collection('Pets')
+    const campaignsCollection = client.db('LovingPets').collection('CampaignsPet')
 
     // verify admin middleware
     const verifyAdmin = async (req, res, next) => {
@@ -120,7 +121,10 @@ async function run() {
         query.pet_name = { $regex: name, $options: 'i' };
       }
       if (category) {
-        query.pet_category = category;
+        query.$or = [
+          { 'pet_category.value': category },
+          { pet_category: category }
+        ];
       }
       const result = await petCollection.find(query).sort({ timestamp: -1 }).toArray();
       res.send(result);
@@ -132,6 +136,21 @@ async function run() {
         const result = await petCollection.findOne(query);
         res.send(result);
       })
+
+      // campaigns
+
+      app.get('/campaignsPet', async (req, res) => {
+        const result = await campaignsCollection.find().sort({ time: -1 }).toArray();
+        res.send(result);
+      });
+
+      app.get('/campaignsPet/:id', async (req, res) => {
+        const id = req.params.id;
+        const query = { _id: new ObjectId(id) }
+        const result = await campaignsCollection.findOne(query);
+        res.send(result);
+      })
+
 
       // all pets
 
@@ -165,7 +184,7 @@ async function run() {
         res.send(result);
       });
 
-      app.put('/allPets/:id', async (req, res) => {
+      app.put('/allPets/:id',verifyToken, async (req, res) => {
         const id = req.params.id;
         const filter = { _id: new ObjectId(id) };
         const options = { upsert: true };
