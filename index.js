@@ -3,6 +3,7 @@ const app = express()
 require('dotenv').config()
 const cors = require('cors')
 const cookieParser = require('cookie-parser')
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 const jwt = require('jsonwebtoken')
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
@@ -57,6 +58,7 @@ async function run() {
     const categoryCollection = client.db('LovingPets').collection('PetCategory')
     const petCollection = client.db('LovingPets').collection('Pets')
     const campaignsCollection = client.db('LovingPets').collection('CampaignsPet')
+    const paymentCollection = client.db('LovingPets').collection('Payments')
 
     // verify admin middleware
     const verifyAdmin = async (req, res, next) => {
@@ -150,6 +152,54 @@ async function run() {
         const result = await campaignsCollection.findOne(query);
         res.send(result);
       })
+
+
+
+            // payment intent
+    app.post('/create-payment-intent', async (req, res) => {
+      const { price } = req.body;
+      const amount = parseInt(price * 100);
+      console.log(amount, 'amount inside the intent')
+
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: amount,
+        currency: 'usd',
+        payment_method_types: ['card']
+      });
+
+      res.send({
+        clientSecret: paymentIntent.client_secret
+      })
+    });
+
+    // app.post('/payments', async (req, res) => {
+    //   const payment = req.body;
+    //   const paymentResult = await paymentCollection.insertOne(payment);
+
+    //   res.send( paymentResult );
+    // })
+
+    app.post('/payments', async (req, res) => {
+      const payment = req.body;
+  
+      const existingPayment = await paymentCollection.findOne({ cartIds: payment.cartIds });
+  
+      if (existingPayment) {
+          await paymentCollection.updateOne(
+              { cartIds: payment.cartIds },
+              { $inc: { donated_amount: payment.donated_amount } }
+          );
+  
+          const updatedPayment = await paymentCollection.findOne({ cartIds: payment.cartIds });
+          return res.send(updatedPayment);
+      } else {
+          const paymentResult = await paymentCollection.insertOne(payment);
+          return res.send(paymentResult);
+      }
+  });
+  
+  
+
 
 
       // all pets
