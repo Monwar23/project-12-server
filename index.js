@@ -142,17 +142,10 @@ async function run() {
       // campaigns
 
       app.get('/campaignsPet', async (req, res) => {
-        const result = await campaignsCollection.find().sort({ time: -1 }).toArray();
+        const query = {status:'unpaused'};
+        const result = await campaignsCollection.find(query).sort({ time: -1 }).toArray();
         res.send(result);
       });
-
-      // app.get('/campaignsPet', async (req, res) => {
-      //   const currentDate = new Date(); 
-      //   console.log(currentDate);
-      //   const result = await campaignsCollection.find({ last_date_of_donation: { $gte:(currentDate) } }).sort({ time: -1 }).toArray();
-      //   res.send(result);
-      // });
-      
 
 
       app.get('/campaignsPet/:id', async (req, res) => {
@@ -179,10 +172,21 @@ async function run() {
         res.send(result);
       });
 
+    app.patch('/campaignsPet/:id', verifyToken, async (req, res) => {
+      const id = req.params.id;
+      const { status } = req.body;
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+          $set: { status }
+      };
+      const result = await campaignsCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+  });
+  
 
 
 
-            // payment intent
+    // payment intent
     app.post('/create-payment-intent', async (req, res) => {
       const { price } = req.body;
       const amount = parseInt(price * 100);
