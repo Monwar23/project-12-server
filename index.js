@@ -146,12 +146,27 @@ async function run() {
         res.send(result);
       });
 
+      // app.get('/campaignsPet', async (req, res) => {
+      //   const currentDate = new Date(); 
+      //   console.log(currentDate);
+      //   const result = await campaignsCollection.find({ last_date_of_donation: { $gte:(currentDate) } }).sort({ time: -1 }).toArray();
+      //   res.send(result);
+      // });
+      
+
+
       app.get('/campaignsPet/:id', async (req, res) => {
         const id = req.params.id;
         const query = { _id: new ObjectId(id) }
         const result = await campaignsCollection.findOne(query);
         res.send(result);
       })
+
+      app.post('/campaignsPet', verifyToken,  async (req, res) => {
+        const item = req.body;
+        const result = await campaignsCollection.insertOne(item);
+        res.send(result);
+      });
 
 
 
@@ -211,6 +226,9 @@ async function run() {
     const result = await paymentCollection.find().toArray()
     res.send(result)
   })
+
+  
+
 
       // all pets
 
