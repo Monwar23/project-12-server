@@ -234,27 +234,27 @@ async function run() {
       const paymentQuery={_id:new ObjectId(payment.cartIds)}
       const updateAmount=await campaignsCollection.updateOne(paymentQuery,updateDoc)
 
-      console.log(updateAmount);
+      // console.log(updateAmount);
 
   
-      const existingPayment = await paymentCollection.findOne({ cartIds: payment.cartIds });
+      // const existingPayment = await paymentCollection.findOne({ cartIds: payment.cartIds });
       
   
-      if (existingPayment) {
-          await paymentCollection.updateOne(
-              { cartIds: payment.cartIds },
-              { $inc: { donated_amount: payment.donated_amount } }
-          );
+      // if (existingPayment) {
+      //     await paymentCollection.updateOne(
+      //         { cartIds: payment.cartIds },
+      //         { $inc: { donated_amount: payment.donated_amount } }
+      //     );
   
-          const updatedPayment = await paymentCollection.findOne({ cartIds: payment.cartIds });
+      //     const updatedPayment = await paymentCollection.findOne({ cartIds: payment.cartIds });
 
           // const 
 
-          return res.send(updatedPayment);
-      } else {
+          // return res.send(updatedPayment);
+      // } else {
           const paymentResult = await paymentCollection.insertOne(payment);
           return res.send(paymentResult);
-      }
+      // }
 
      
   });
@@ -264,7 +264,17 @@ async function run() {
     res.send(result)
   })
 
-  
+
+  app.get("/payments/email/:email", verifyToken, async (req, res) => {
+    const tokenEmail = req.user.email
+    const email = req.params.email;
+    if (tokenEmail !== email) {
+      return res.status(403).send({ message: 'forbidden access' })
+    }
+    const query = { email: email };
+    const result = await paymentCollection.find(query).toArray();
+    res.send(result);
+  });
 
 
       // all pets
