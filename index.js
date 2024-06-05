@@ -168,6 +168,18 @@ async function run() {
         res.send(result);
       });
 
+      app.get("/campaignsPet/email/:email", verifyToken, async (req, res) => {
+        const tokenEmail = req.user.email
+        const email = req.params.email;
+        if (tokenEmail !== email) {
+          return res.status(403).send({ message: 'forbidden access' })
+        }
+        const query = { email: email };
+        const result = await campaignsCollection.find(query).toArray();
+        res.send(result);
+      });
+
+
 
 
             // payment intent
