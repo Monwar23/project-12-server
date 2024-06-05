@@ -182,6 +182,27 @@ async function run() {
       const result = await campaignsCollection.updateOne(filter, updatedDoc);
       res.send(result);
   });
+
+  app.put('/campaignsPet/:id',verifyToken, async (req, res) => {
+    const id = req.params.id;
+    const filter = { _id: new ObjectId(id) };
+    const options = { upsert: true };
+    const updatePets = req.body;
+    const pets = {
+        $set: {
+          pet_image_url: updatePets.pet_image_url,
+            pet_name: updatePets.pet_name,
+            maximum_donation_amount: updatePets.maximum_donation_amount,            
+            last_date_of_donation: updatePets.last_date_of_donation,
+            short_description: updatePets.short_description,
+            long_description: updatePets.long_description,
+            status: updatePets.status,
+            email: updatePets.email,
+        },
+    };
+    const result = await campaignsCollection.updateOne(filter, pets, options);
+    res.send(result);
+});
   
 
 
