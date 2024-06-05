@@ -172,17 +172,21 @@ async function run() {
       })
     });
 
-    // app.post('/payments', async (req, res) => {
-    //   const payment = req.body;
-    //   const paymentResult = await paymentCollection.insertOne(payment);
-
-    //   res.send( paymentResult );
-    // })
-
     app.post('/payments', async (req, res) => {
       const payment = req.body;
+
+      const paymentAmount=payment.donated_amount;
+      const updateDoc={
+        $inc:{donated_amount:paymentAmount}
+      }
+      const paymentQuery={_id:new ObjectId(payment.cartIds)}
+      const updateAmount=await campaignsCollection.updateOne(paymentQuery,updateDoc)
+
+      console.log(updateAmount);
+
   
       const existingPayment = await paymentCollection.findOne({ cartIds: payment.cartIds });
+      
   
       if (existingPayment) {
           await paymentCollection.updateOne(
@@ -191,16 +195,22 @@ async function run() {
           );
   
           const updatedPayment = await paymentCollection.findOne({ cartIds: payment.cartIds });
+
+          // const 
+
           return res.send(updatedPayment);
       } else {
           const paymentResult = await paymentCollection.insertOne(payment);
           return res.send(paymentResult);
       }
+
+     
   });
-  
-  
 
-
+  app.get('/payments', async (req, res) => {
+    const result = await paymentCollection.find().toArray()
+    res.send(result)
+  })
 
       // all pets
 
