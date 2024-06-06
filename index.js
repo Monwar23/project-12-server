@@ -59,6 +59,7 @@ async function run() {
     const petCollection = client.db('LovingPets').collection('Pets')
     const campaignsCollection = client.db('LovingPets').collection('CampaignsPet')
     const paymentCollection = client.db('LovingPets').collection('Payments')
+    const adoptCollection = client.db('LovingPets').collection('Adoption')
 
     // verify admin middleware
     const verifyAdmin = async (req, res, next) => {
@@ -223,7 +224,48 @@ async function run() {
     res.send(result);
 });
   
+// Adoption
 
+app.post('/adopt', verifyToken,  async (req, res) => {
+  const item = req.body;
+  const result = await adoptCollection.insertOne(item);
+  res.send(result);
+});
+
+app.get('/adopt', async (req, res) => {
+  const result = await adoptCollection.find().toArray()
+  res.send(result)
+})
+
+
+app.get('/adopt/:id', async (req, res) => {
+  const id = req.params.id;
+  const query = { _id: new ObjectId(id) }
+  const result = await adoptCollection.findOne(query);
+  res.send(result);
+})
+
+app.get("/adopt/email/:email", verifyToken, async (req, res) => {
+  const tokenEmail = req.user.email
+  const email = req.params.email;
+  if (tokenEmail !== email) {
+    return res.status(403).send({ message: 'forbidden access' })
+  }
+  const query = { email: email };
+  const result = await adoptCollection.find(query).toArray();
+  res.send(result);
+});
+app.patch('/adopt/:id',verifyToken, async (req, res) => {
+  const id = req.params.id;
+  const filter = { _id: new ObjectId(id) };
+  const updatedDoc = {
+      $set: {
+          status: 'accepted'
+      }
+  }
+  const result = await adoptCollection.updateOne(filter, updatedDoc);
+  res.send(result);
+})
 
 
     // payment intent
