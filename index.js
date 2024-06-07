@@ -11,7 +11,7 @@ const port = process.env.PORT || 5000
 
 // middleware
 const corsOptions = {
-  origin: ['http://localhost:5173', 'http://localhost:5174','https://loving-pets.netlify.app'],
+  origin: ['http://localhost:5173', 'http://localhost:5174', 'https://loving-pets.netlify.app'],
   credentials: true,
   optionSuccessStatus: 200,
 }
@@ -255,6 +255,7 @@ async function run() {
       const result = await adoptCollection.find(query).toArray();
       res.send(result);
     });
+
     app.patch('/adopt/:id', verifyToken, async (req, res) => {
       const id = req.params.id;
       const filter = { _id: new ObjectId(id) };
@@ -303,6 +304,30 @@ async function run() {
       const result = await paymentCollection.find().toArray()
       res.send(result)
     })
+    app.get('/payments/:id', async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) }
+      const result = await paymentCollection.findOne(query);
+      res.send(result);
+    })
+
+
+    app.patch('/payments/:id', verifyToken, async (req, res) => {
+      const id = req.params.id;
+      console.log(req.body);
+      const filter = { _id: new ObjectId(id) };
+      const updatedDoc = {
+        $set: {
+          donated_amount: 0
+        }
+      }
+      const result = await paymentCollection.updateOne(filter, updatedDoc);
+      res.send(result);
+    })
+
+  
+
+
 
 
     app.get("/payments/email/:email", verifyToken, async (req, res) => {
